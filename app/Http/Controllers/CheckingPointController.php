@@ -13,7 +13,7 @@ class CheckingPointController extends Controller
             return \Yajra\DataTables\Facades\DataTables::of($data)
                 ->addIndexColumn()
                 ->editColumn('created_at', function($row){
-                    return $row->created_at->format('d M, Y');
+                    return $row->created_at ? $row->created_at->format('d M, Y') : '-';
                 })
                 ->addColumn('action', function($row){
                     $btn = '<button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('.$row->id.', \''.addslashes($row->name).'\', \''.addslashes($row->police_station ?? '').'\', \''.addslashes($row->incharge_name ?? '').'\')"><i class="bx bx-edit"></i> Edit</button>';

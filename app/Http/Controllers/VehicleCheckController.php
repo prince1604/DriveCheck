@@ -91,8 +91,8 @@ class VehicleCheckController extends Controller
                     return '<div class="d-flex align-items-center">
                                 '.$photoHtml.'
                                 <div>
-                                    <div class="fw-bold text-dark">'.htmlentities($row->person_name).'</div>
-                                    <div class="small text-primary fw-bold">'.htmlentities($row->vehicle_no).'</div>
+                                    <div class="fw-bold text-dark">'.htmlentities($row->person_name ?? '').'</div>
+                                    <div class="small text-primary fw-bold">'.htmlentities($row->vehicle_no ?? '').'</div>
                                 </div>
                             </div>';
                 })
@@ -102,7 +102,8 @@ class VehicleCheckController extends Controller
                 ->addColumn('checking_point', function($row) {
                     $badgeColors = ['bg-label-primary', 'bg-label-success', 'bg-label-danger', 'bg-label-warning', 'bg-label-info', 'bg-label-dark'];
                     $badgeClass = $row->checkingPoint ? $badgeColors[$row->checkingPoint->id % count($badgeColors)] : 'bg-label-secondary';
-                    return '<span class="badge ' . $badgeClass . ' fw-bold">'.htmlentities($row->checkingPoint->name ?? 'N/A').'</span>';
+                    $pointName = $row->checkingPoint ? $row->checkingPoint->name : 'N/A';
+                    return '<span class="badge ' . $badgeClass . ' fw-bold">'.htmlentities($pointName).'</span>';
                 })
                 ->addColumn('shift_time', function($row) {
                     $date = $row->shift_date ? $row->shift_date->format('d M, Y') : '';
@@ -114,8 +115,10 @@ class VehicleCheckController extends Controller
                     return '<span class="small text-muted" style="white-space: pre-line;">'.htmlentities($row->remark ?? '-').'</span>';
                 })
                 ->addColumn('recorded_by', function($row) {
-                    return '<div class="fw-bold">'.htmlentities($row->user->name).'</div>
-                            <div class="small">'.($row->user->employee_id ?? 'Admin').'</div>';
+                    $name = $row->user ? $row->user->name : 'Unknown';
+                    $empId = $row->user ? ($row->user->employee_id ?? 'Admin') : 'Admin';
+                    return '<div class="fw-bold">'.htmlentities($name).'</div>
+                            <div class="small">'.htmlentities($empId).'</div>';
                 })
                 ->addColumn('action', function($row) use ($user) {
                     $photoUrl = $row->vehicle_photo ? \Illuminate\Support\Facades\Storage::url($row->vehicle_photo) : '';

@@ -261,11 +261,11 @@ class AdminController extends Controller
                     } else {
                         $html .= '<div class="avatar avatar-sm me-3"><span class="avatar-initial rounded-circle bg-label-primary">'.strtoupper(substr($row->name, 0, 1)).'</span></div>';
                     }
-                    $html .= '<div class="d-flex flex-column"><span class="fw-bold text-dark">'.htmlentities($row->name).'</span><small class="text-muted">'.htmlentities($row->email).'</small></div></div>';
+                    $html .= '<div class="d-flex flex-column"><span class="fw-bold text-dark">'.htmlentities($row->name ?? '').'</span><small class="text-muted">'.htmlentities($row->email ?? '').'</small></div></div>';
                     return $html;
                 })
                 ->addColumn('emp_id', function($row) {
-                    return '<span class="fw-bold">'.htmlentities($row->employee_id).'</span>';
+                    return '<span class="fw-bold">'.htmlentities($row->employee_id ?? '').'</span>';
                 })
                 ->addColumn('police_station', function($row) {
                     return htmlentities($row->policestation ?? '-');
