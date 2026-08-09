@@ -1,6 +1,5 @@
 # DriveCheck: Vehicle Monitoring System 🚓
 
-![DriveCheck Banner](https://via.placeholder.com/1200x400/696cff/ffffff?text=DriveCheck+-+Law+Enforcement+Monitoring+System)
 
 **DriveCheck** is a state-of-the-art Human Resource Management System (HRMS) and Vehicle Monitoring Portal custom-built for modern law enforcement. Designed with a mobile-first, high-performance architecture, the system digitizes the logging of vehicle checks, automates duty rosters, and provides commanding officers with real-time, actionable analytics to ensure optimal resource deployment and heightened regional security.
 
