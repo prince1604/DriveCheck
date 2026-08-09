@@ -126,12 +126,17 @@ class EmployeeController extends Controller
         ]);
 
         if ($request->hasFile('profile_photo')) {
-            if ($user->profile_photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_photo)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+            if ($user->profile_photo) {
+                if (str_starts_with($user->profile_photo, 'profile_photos/') && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_photo)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+                } elseif (file_exists(public_path($user->profile_photo))) {
+                    @unlink(public_path($user->profile_photo));
+                }
             }
             
-            $path = $request->file('profile_photo')->store('profile_photos', 'public');
-            $validated['profile_photo'] = $path;
+            $fileName = time() . '_' . $request->file('profile_photo')->getClientOriginalName();
+            $request->file('profile_photo')->move(public_path('uploads/profile_photos'), $fileName);
+            $validated['profile_photo'] = 'uploads/profile_photos/' . $fileName;
         }
 
         $user->update($validated);

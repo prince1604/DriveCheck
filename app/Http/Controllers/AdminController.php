@@ -257,7 +257,12 @@ class AdminController extends Controller
                 ->addColumn('profile', function($row) {
                     $html = '<div class="d-flex align-items-center">';
                     if ($row->profile_photo) {
-                        $html .= '<div class="avatar avatar-sm me-3"><img src="'.\Illuminate\Support\Facades\Storage::url($row->profile_photo).'" alt="Avatar" class="rounded-circle" style="object-fit: cover;"></div>';
+                        if (str_starts_with($row->profile_photo, 'profile_photos/')) {
+                            $url = asset('storage/' . $row->profile_photo);
+                        } else {
+                            $url = asset($row->profile_photo);
+                        }
+                        $html .= '<div class="avatar avatar-sm me-3"><img src="'.$url.'" alt="Avatar" class="rounded-circle" style="object-fit: cover;"></div>';
                     } else {
                         $html .= '<div class="avatar avatar-sm me-3"><span class="avatar-initial rounded-circle bg-label-primary">'.strtoupper(substr($row->name, 0, 1)).'</span></div>';
                     }
@@ -397,11 +402,16 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('profile_photo')) {
-            if ($user->profile_photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_photo)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+            if ($user->profile_photo) {
+                if (str_starts_with($user->profile_photo, 'profile_photos/') && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_photo)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+                } elseif (file_exists(public_path($user->profile_photo))) {
+                    @unlink(public_path($user->profile_photo));
+                }
             }
-            $path = $request->file('profile_photo')->store('profile_photos', 'public');
-            $validated['profile_photo'] = $path;
+            $fileName = time() . '_' . $request->file('profile_photo')->getClientOriginalName();
+            $request->file('profile_photo')->move(public_path('uploads/profile_photos'), $fileName);
+            $validated['profile_photo'] = 'uploads/profile_photos/' . $fileName;
         }
 
         if ($request->filled('password')) {

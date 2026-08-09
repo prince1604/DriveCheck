@@ -78,7 +78,11 @@ class VehicleCheckController extends Controller
                 ->addColumn('person_vehicle', function($row) {
                     $photoHtml = '';
                     if ($row->vehicle_photo) {
-                        $url = \Illuminate\Support\Facades\Storage::url($row->vehicle_photo);
+                        if (str_starts_with($row->vehicle_photo, 'vehicle_photos/')) {
+                            $url = asset('storage/' . $row->vehicle_photo);
+                        } else {
+                            $url = asset($row->vehicle_photo);
+                        }
                         $photoHtml = '<div class="avatar avatar-md me-3" style="width: 50px; height: 50px;">
                                         <img src="'.$url.'" alt="Vehicle" class="rounded" style="object-fit: cover; width: 100%; height: 100%; cursor: pointer;" onclick="showImage(\''.$url.'\')">
                                       </div>';
@@ -121,7 +125,15 @@ class VehicleCheckController extends Controller
                             <div class="small">'.htmlentities($empId).'</div>';
                 })
                 ->addColumn('action', function($row) use ($user) {
-                    $photoUrl = $row->vehicle_photo ? \Illuminate\Support\Facades\Storage::url($row->vehicle_photo) : '';
+                    if ($row->vehicle_photo) {
+                        if (str_starts_with($row->vehicle_photo, 'vehicle_photos/')) {
+                            $photoUrl = asset('storage/' . $row->vehicle_photo);
+                        } else {
+                            $photoUrl = asset($row->vehicle_photo);
+                        }
+                    } else {
+                        $photoUrl = '';
+                    }
                     $editBtn = '<button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal('.$row->id.', \''.$row->checking_point_id.'\', \''.addslashes($row->person_name).'\', \''.($row->shift_date ? $row->shift_date->format('Y-m-d') : '').'\', \''.$row->shift_type.'\', \''.addslashes($row->vehicle_no).'\', \''.addslashes($row->employee_id_no).'\', \''.($row->checking_time ? \Carbon\Carbon::parse($row->checking_time)->format('H:i') : '').'\', \''.addslashes($row->remark).'\', \''.$photoUrl.'\')"><i class="bx bx-edit"></i></button>';
                     
                     $destroyRoute = $user->user_type_id == 1 ? route('admin.vehicle-checks.destroy', $row->id) : route('employee.vehicle-checks.destroy', $row->id);
@@ -182,7 +194,9 @@ class VehicleCheckController extends Controller
         }
 
         if ($request->hasFile('vehicle_photo')) {
-            $validated['vehicle_photo'] = $request->file('vehicle_photo')->store('vehicle_photos', 'public');
+            $fileName = time() . '_' . $request->file('vehicle_photo')->getClientOriginalName();
+            $request->file('vehicle_photo')->move(public_path('uploads/vehicle_photos'), $fileName);
+            $validated['vehicle_photo'] = 'uploads/vehicle_photos/' . $fileName;
         }
 
         \App\Models\VehicleCheck::create($validated);
@@ -225,10 +239,16 @@ class VehicleCheckController extends Controller
         }
 
         if ($request->hasFile('vehicle_photo')) {
-            if ($vehicleCheck->vehicle_photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($vehicleCheck->vehicle_photo)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($vehicleCheck->vehicle_photo);
+            if ($vehicleCheck->vehicle_photo) {
+                if (str_starts_with($vehicleCheck->vehicle_photo, 'vehicle_photos/') && \Illuminate\Support\Facades\Storage::disk('public')->exists($vehicleCheck->vehicle_photo)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($vehicleCheck->vehicle_photo);
+                } elseif (file_exists(public_path($vehicleCheck->vehicle_photo))) {
+                    @unlink(public_path($vehicleCheck->vehicle_photo));
+                }
             }
-            $validated['vehicle_photo'] = $request->file('vehicle_photo')->store('vehicle_photos', 'public');
+            $fileName = time() . '_' . $request->file('vehicle_photo')->getClientOriginalName();
+            $request->file('vehicle_photo')->move(public_path('uploads/vehicle_photos'), $fileName);
+            $validated['vehicle_photo'] = 'uploads/vehicle_photos/' . $fileName;
         }
 
         $vehicleCheck->update($validated);
@@ -246,8 +266,12 @@ class VehicleCheckController extends Controller
             abort(403);
         }
 
-        if ($vehicleCheck->vehicle_photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($vehicleCheck->vehicle_photo)) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($vehicleCheck->vehicle_photo);
+        if ($vehicleCheck->vehicle_photo) {
+            if (str_starts_with($vehicleCheck->vehicle_photo, 'vehicle_photos/') && \Illuminate\Support\Facades\Storage::disk('public')->exists($vehicleCheck->vehicle_photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($vehicleCheck->vehicle_photo);
+            } elseif (file_exists(public_path($vehicleCheck->vehicle_photo))) {
+                @unlink(public_path($vehicleCheck->vehicle_photo));
+            }
         }
 
         $vehicleCheck->delete();

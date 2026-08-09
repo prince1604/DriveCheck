@@ -16,7 +16,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-start align-items-sm-center gap-4">
                         @if($user->profile_photo)
-                            <img src="{{ Storage::url($user->profile_photo) }}" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" style="object-fit: cover;"/>
+                            <img src="{{ str_starts_with($user->profile_photo, 'profile_photos/') ? asset('storage/' . $user->profile_photo) : asset($user->profile_photo) }}" alt="user-avatar" class="d-block rounded" height="100" width="100" id="uploadedAvatar" style="object-fit: cover;"/>
                         @else
                             <div class="d-block rounded d-flex align-items-center justify-content-center text-white fw-bold" style="height: 100px; width: 100px; background-color: #696cff; font-size: 2.5rem;" id="uploadedAvatarPlaceholder">
                                 {{ strtoupper(substr($user->name, 0, 1)) }}

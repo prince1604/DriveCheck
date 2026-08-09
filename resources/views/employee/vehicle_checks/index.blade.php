@@ -463,10 +463,31 @@
             },
             body: formData
         })
-        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(async response => {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const data = await response.json();
+                return { status: response.status, body: data, isJson: true };
+            } else {
+                const text = await response.text();
+                return { status: response.status, body: text, isJson: false };
+            }
+        })
         .then(res => {
             submitBtn.disabled = false;
             spinner.classList.add('d-none');
+            
+            if (!res.isJson) {
+                if (res.status === 413) {
+                    errorsDiv.innerHTML = 'Error: The uploaded image is too large. Please select a smaller file (under 2MB).';
+                } else if (res.status === 500) {
+                    errorsDiv.innerHTML = 'Server Error (500). The upload folder might be missing or lack write permissions.';
+                } else {
+                    errorsDiv.innerHTML = 'Server returned an error (' + res.status + '). Please try again.';
+                }
+                errorsDiv.classList.remove('d-none');
+                return;
+            }
             
             if (res.status === 422) {
                 let errorHtml = '<ul class="mb-0">';
@@ -498,7 +519,7 @@
             console.error('Error:', error);
             submitBtn.disabled = false;
             spinner.classList.add('d-none');
-            errorsDiv.innerHTML = 'A network error occurred.';
+            errorsDiv.innerHTML = 'A network error occurred. Please check your internet connection.';
             errorsDiv.classList.remove('d-none');
         });
     });

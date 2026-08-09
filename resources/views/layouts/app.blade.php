@@ -749,7 +749,7 @@
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
                                         @if($user->profile_photo)
-                                            <img src="{{ Storage::url($user->profile_photo) }}" alt class="rounded-circle" style="object-fit: cover; width: 40px; height: 40px;">
+                                            <img src="{{ str_starts_with($user->profile_photo, 'profile_photos/') ? asset('storage/' . $user->profile_photo) : asset($user->profile_photo) }}" alt class="rounded-circle" style="object-fit: cover; width: 40px; height: 40px;">
                                         @else
                                             <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold h-100 w-100" style="background-color: {{ $isAdmin ? '#696cff' : '#71dd37' }}">
                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
@@ -764,7 +764,7 @@
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
                                                         @if($user->profile_photo)
-                                                            <img src="{{ Storage::url($user->profile_photo) }}" alt class="rounded-circle" style="object-fit: cover; width: 40px; height: 40px;">
+                                                            <img src="{{ str_starts_with($user->profile_photo, 'profile_photos/') ? asset('storage/' . $user->profile_photo) : asset($user->profile_photo) }}" alt class="rounded-circle" style="object-fit: cover; width: 40px; height: 40px;">
                                                         @else
                                                             <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold h-100 w-100" style="background-color: {{ $isAdmin ? '#696cff' : '#71dd37' }}">
                                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
